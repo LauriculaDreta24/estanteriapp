@@ -1,0 +1,167 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Montserrat:wght@100;300;400&display=swap');
+
+:root {
+  --color-vermeil: #E63946;
+  --color-crema: #F5F5DC;
+  --color-negre: #000000;
+  --font-serif: 'DM Serif Display', serif;
+  --font-sans: 'Montserrat', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--color-crema);
+  font-family: var(--font-sans);
+  color: var(--color-negre);
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+.blackie-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header-red {
+  background-color: var(--color-vermeil);
+  height: 40vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border-bottom: 4px solid var(--color-negre);
+}
+
+.icon-top {
+  width: 60px;
+  height: auto;
+  opacity: 0.9;
+}
+
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.logo-container {
+  text-align: left;
+  margin-bottom: 2rem;
+}
+
+.label-thin {
+  font-family: var(--font-sans);
+  font-weight: 100;
+  font-size: 3rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2rem;
+  line-height: 0.8;
+  color: rgba(0,0,0,0.4);
+}
+
+.title-bold {
+  font-family: var(--font-serif);
+  font-size: 5.5rem;
+  color: var(--color-vermeil);
+  line-height: 0.85;
+  margin-top: 0.5rem;
+}
+
+.year-thin {
+  font-family: var(--font-sans);
+  font-weight: 100;
+  font-size: 4rem;
+  letter-spacing: -2px;
+  margin-top: 1rem;
+}
+
+/* Formulari */
+.form-card {
+  background: white;
+  border: 3px solid var(--color-negre);
+  padding: 2rem;
+  box-shadow: 10px 10px 0px var(--color-negre);
+  margin-top: 2rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+label {
+  display: block;
+  font-family: var(--font-sans);
+  font-weight: 400;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  margin-bottom: 0.5rem;
+}
+
+input[type="text"], 
+input[type="url"],
+textarea {
+  width: 100%;
+  padding: 0.8rem;
+  border: 2px solid var(--color-negre);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  background: transparent;
+  outline: none;
+}
+
+input:focus, textarea:focus {
+  background: var(--color-crema);
+}
+
+.btn-blackie {
+  background-color: var(--color-negre);
+  color: white;
+  padding: 1rem 2rem;
+  border: none;
+  font-family: var(--font-sans);
+  font-weight: 400;
+  text-transform: uppercase;
+  cursor: pointer;
+  width: 100%;
+  font-size: 1.1rem;
+  transition: transform 0.1s;
+}
+
+.btn-blackie:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 4px 4px 0px var(--color-vermeil);
+}
+
+.btn-blackie:active {
+  transform: translate(0, 0);
+  box-shadow: none;
+}
+
+.login-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--color-vermeil);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  color: white;
+}
+
+.login-logo {
+  font-family: var(--font-serif);
+  font-size: 4rem;
+  margin-bottom: 2rem;
+}
