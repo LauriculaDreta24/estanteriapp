@@ -71,9 +71,17 @@ function App() {
   const [editingBook, setEditingBook] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [booksPerShelf, setBooksPerShelf] = useState(8);
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+      const containerWidth = window.innerWidth * 0.9;
+      const bookWidth = window.innerWidth <= 768 ? 61 : 71;
+      const count = Math.floor((containerWidth - 64) / bookWidth);
+      setBooksPerShelf(Math.max(1, count));
+    };
+    handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -529,9 +537,9 @@ function App() {
           </section>
         ) : (
           <>
-            {Array.from({ length: Math.ceil(categories.length / 8) || 1 }).map((_, shelfIndex) => (
+            {Array.from({ length: Math.ceil(categories.length / booksPerShelf) || 1 }).map((_, shelfIndex) => (
               <div key={shelfIndex} className="shelf">
-                {categories.slice(shelfIndex * 8, (shelfIndex + 1) * 8).map(cat => (
+                {categories.slice(shelfIndex * booksPerShelf, (shelfIndex + 1) * booksPerShelf).map(cat => (
                   <div 
                     key={cat.id} 
                     className="book-spine" 
