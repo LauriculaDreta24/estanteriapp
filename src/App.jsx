@@ -280,13 +280,13 @@ function App() {
 
   const filteredCategories = categories.filter(cat => {
     if (!cat) return false;
-    const s = (searchTerm || '').toLowerCase();
-    const cleanS = s.startsWith('#') ? s.substring(1).trim() : s.trim();
+    const term = (searchTerm || '').toLowerCase().trim();
+    const termNoHash = term.startsWith('#') ? term.substring(1) : term;
     
     const matches = (val) => {
-      if (val === undefined || val === null) return false;
+      if (!val) return false;
       const str = String(val).toLowerCase();
-      return str.includes(s) || (cleanS && str.includes(cleanS));
+      return str.includes(term) || (termNoHash && str.includes(termNoHash));
     };
 
     const matchesName = matches(cat.nom);
@@ -388,19 +388,19 @@ function App() {
               <div className="search-recommendations">
                 {items.filter(item => {
                   if (!item) return false;
-                  const s = (searchTerm || '').toLowerCase();
-                  const cleanS = s.startsWith('#') ? s.substring(1).trim() : s.trim();
+                  const term = searchTerm.toLowerCase().trim();
+                  const termNoHash = term.startsWith('#') ? term.substring(1) : term;
                   const matches = (val) => {
-                    if (val === undefined || val === null) return false;
+                    if (!val) return false;
                     const str = String(val).toLowerCase();
-                    return str.includes(s) || (cleanS && str.includes(cleanS));
+                    return str.includes(term) || (termNoHash && str.includes(termNoHash));
                   };
 
                   return matches(item.titol) || 
                          matches(item.etiquetesRaw) || 
                          (Array.isArray(item.etiquetes) && item.etiquetes.some(t => matches(t))) ||
                          matches(item.comentari);
-                }).map(item => {
+                }).slice(0, 5).map(item => {
                   const cat = categories.find(c => c.id === item.categoryId || c.id === item.categoriaId);
                   return (
                     <div key={item.id} className="recommendation-item" onClick={() => {
@@ -408,7 +408,6 @@ function App() {
                         const bookPages = items.filter(i => (i.categoryId || i.categoriaId) === cat.id);
                         const pageIdx = bookPages.findIndex(i => i.id === item.id);
                         openBook(cat);
-                        // Trobem quina és la pàgina inicial (per parelles)
                         setCurrentPage(Math.floor(pageIdx / 2) * 2);
                         setSearchTerm('');
                       }
@@ -432,22 +431,29 @@ function App() {
               Resultats per "{searchTerm}"
             </h3>
             <div style={{ display: 'grid', gap: '3rem' }}>
-              {items.filter(item => {
-                if (!item) return false;
-                const s = (searchTerm || '').toLowerCase();
-                const cleanS = s.startsWith('#') ? s.substring(1).trim() : s.trim();
-                const matches = (val) => {
-                  if (val === undefined || val === null) return false;
-                  const str = String(val).toLowerCase();
-                  return str.includes(s) || (cleanS && str.includes(cleanS));
-                };
+              {(() => {
+                const results = items.filter(item => {
+                  if (!item) return false;
+                  const term = searchTerm.toLowerCase().trim();
+                  const termNoHash = term.startsWith('#') ? term.substring(1) : term;
+                  const matches = (val) => {
+                    if (!val) return false;
+                    const str = String(val).toLowerCase();
+                    return str.includes(term) || (termNoHash && str.includes(termNoHash));
+                  };
 
-                const matchesTitle = matches(item.titol);
-                const matchesTags = matches(item.etiquetesRaw) || 
-                                   (Array.isArray(item.etiquetes) && item.etiquetes.some(t => matches(t)));
-                const matchesComment = matches(item.comentari);
-                return matchesTitle || matchesTags || matchesComment;
-              }).map(item => (
+                  const matchesTitle = matches(item.titol);
+                  const matchesTags = matches(item.etiquetesRaw) || 
+                                     (Array.isArray(item.etiquetes) && item.etiquetes.some(t => matches(t)));
+                  const matchesComment = matches(item.comentari);
+                  return matchesTitle || matchesTags || matchesComment;
+                });
+
+                if (results.length === 0) {
+                  return <div style={{ textAlign: 'center', padding: '3rem', opacity: 0.5 }}>No s'ha trobat cap pàgina amb aquest contingut.</div>;
+                }
+
+                return results.map(item => (
                 <div key={item.id} className="search-result-item" onClick={() => {
                   const cat = categories.find(c => c.id === item.categoryId || c.id === item.categoriaId);
                   if (cat) {
@@ -472,7 +478,8 @@ function App() {
                     ))}
                   </div>
                 </div>
-              ))}
+                ));
+              })()}
             </div>
           </section>
         ) : (
