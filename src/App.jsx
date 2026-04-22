@@ -427,6 +427,9 @@ function App() {
                     return (term && str.includes(term)) || (termNoHash && str.includes(termNoHash));
                   };
 
+                  const cat = categories.find(c => c.id === item.categoryId || c.id === item.categoriaId);
+                  if (!cat) return false;
+
                   return matches(item.titol) || 
                          matches(item.etiquetesRaw) || 
                          (Array.isArray(item.etiquetes) && item.etiquetes.some(t => matches(t))) ||
@@ -474,6 +477,9 @@ function App() {
 
                   const results = items.filter(item => {
                     if (!item) return false;
+                    const cat = categories.find(c => c.id === item.categoryId || c.id === item.categoriaId);
+                    if (!cat) return false;
+
                     const matchesTitle = matches(item.titol);
                     const matchesTags = matches(item.etiquetesRaw) || 
                                        (Array.isArray(item.etiquetes) && item.etiquetes.some(t => matches(t)));
