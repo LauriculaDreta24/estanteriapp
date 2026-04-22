@@ -19,6 +19,8 @@ import {
 import { auth, googleProvider, db } from './firebase/config';
 import { LogOut, Plus, Link as LinkIcon, MessageSquare, Tag, Search, Book, X, ChevronLeft, ChevronRight, Edit2, Trash2, Settings, Library } from 'lucide-react';
 
+const ALLOWED_EMAILS = ['lauradb12@gmail.com', 'mrodzar@gmail.com'];
+
 // Component per a la previsualització d'enllaços fent servir Microlink
 const LinkPreview = ({ url }) => {
   const [data, setData] = useState(null);
@@ -128,7 +130,14 @@ function App() {
   }, []);
 
   const handleLogin = () => signInWithPopup(auth, googleProvider);
-  const handleLogout = () => signOut(auth);
+  const handleLogout = () => {
+    signOut(auth);
+    setSelectedBook(null);
+    setSearchTerm('');
+  };
+
+  // Comprovar si l'usuari està autoritzat
+  const isAuthorized = user && ALLOWED_EMAILS.includes(user.email.toLowerCase());
 
   const handleSubmitPage = async (e) => {
     e.preventDefault();
@@ -337,6 +346,18 @@ function App() {
         <div className="login-logo">Estanteriapp</div>
         <button className="btn-blackie" style={{ background: 'white', color: 'black', width: 'auto', padding: '1rem 3rem' }} onClick={handleLogin}>
           Entra amb Google
+        </button>
+      </div>
+    );
+  }
+
+  if (!isAuthorized) {
+    return (
+      <div className="login-overlay" style={{ textAlign: 'center', padding: '2rem' }}>
+        <h2 style={{ color: 'white', marginBottom: '1rem' }}>Accés Restringit</h2>
+        <p style={{ color: 'white', opacity: 0.7 }}>No tens permís per accedir a aquesta biblioteca.</p>
+        <button className="btn-blackie" style={{ background: 'white', color: 'black', marginTop: '2rem' }} onClick={handleLogout}>
+          Tancar sessió
         </button>
       </div>
     );
@@ -748,9 +769,22 @@ function App() {
                             <LinkPreview url={bookItems[currentPage].enllac} />
                           </div>
                         )}
-                        <div style={{ marginTop: '1.5rem' }}>
-                          {bookItems[currentPage].etiquetes?.map((tag, i) => <span key={i} className="tag-badge">#{tag}</span>)}
-                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginTop: '1rem' }}>
+                            {bookItems[currentPage].etiquetes?.map((tag, i) => (
+                              <span 
+                                key={i} 
+                                className="tag-badge" 
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => {
+                                  setSearchTerm('#' + tag);
+                                  setActiveModal(null);
+                                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                                }}
+                              >
+                                #{tag}
+                              </span>
+                            ))}
+                          </div>
                         <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem' }}>
                           <button className="btn-icon-tiny" onClick={() => startEditPage(bookItems[currentPage])}><Edit2 size={12} /> Editar</button>
                           <button className="btn-icon-tiny" onClick={() => deletePage(bookItems[currentPage].id)}><Trash2 size={12} /> Eliminar</button>
@@ -794,8 +828,21 @@ function App() {
                               <LinkPreview url={bookItems[currentPage + 1].enllac} />
                             </div>
                           )}
-                          <div style={{ marginTop: '1.5rem' }}>
-                            {bookItems[currentPage + 1].etiquetes?.map((tag, i) => <span key={i} className="tag-badge">#{tag}</span>)}
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginTop: '1rem' }}>
+                            {bookItems[currentPage + 1].etiquetes?.map((tag, i) => (
+                              <span 
+                                key={i} 
+                                className="tag-badge" 
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => {
+                                  setSearchTerm('#' + tag);
+                                  setActiveModal(null);
+                                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                                }}
+                              >
+                                #{tag}
+                              </span>
+                            ))}
                           </div>
                           <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem' }}>
                             <button className="btn-icon-tiny" onClick={() => startEditPage(bookItems[currentPage + 1])}><Edit2 size={12} /> Editar</button>
