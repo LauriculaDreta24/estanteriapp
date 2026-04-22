@@ -376,34 +376,7 @@ function App() {
         </div>
 
         <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-          <div className="icon-top" style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-             {/* Només dos llibres */}
-             <div style={{ display: 'flex', alignItems: 'flex-end', gap: '5px', paddingBottom: '5px' }}>
-                {/* Llibre 1: Alt i recte (Esquerra) */}
-                <div style={{ width: '22px', height: '90px', background: 'white', borderRadius: '2px', position: 'relative' }}>
-                   <div style={{ position: 'absolute', top: '8px', left: '4px', right: '4px', height: '12px', background: 'rgba(0,0,0,0.1)' }}></div>
-                </div>
-
-                {/* Llibre 2: Més petit i inclinat a l'esquerra (Dreta, recolzant-se) */}
-                <div style={{ 
-                   width: '20px', 
-                   height: '70px', 
-                   background: 'white', 
-                   borderRadius: '2px', 
-                   transform: 'rotate(-10deg)', 
-                   transformOrigin: 'bottom left', 
-                   position: 'relative'
-                }}>
-                   <div style={{ position: 'absolute', top: '6px', left: '3px', right: '3px', height: '8px', background: 'rgba(0,0,0,0.1)' }}></div>
-                </div>
-             </div>
-
-             {/* Estanteria amb suports */}
-             <div style={{ width: '100px', height: '6px', background: 'white', position: 'relative' }}>
-                <div style={{ position: 'absolute', top: '6px', left: '20px', width: '12px', height: '8px', background: 'white' }}></div>
-                <div style={{ position: 'absolute', top: '6px', right: '20px', width: '12px', height: '8px', background: 'white' }}></div>
-             </div>
-          </div>
+          <Library size={70} color="white" strokeWidth={1} style={{ opacity: 0.9 }} />
         </div>
 
         <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>

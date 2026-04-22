@@ -699,12 +699,12 @@ body {
   }
 
   .book-spine {
-    width: 35px;
-    height: 130px;
+    width: 55px; /* Més ample per llegir títols */
+    height: 140px;
   }
 
   .book-title-spine {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     max-height: 110px;
   }
 
