@@ -63,6 +63,7 @@ function App() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [isTurningPage, setIsTurningPage] = useState(false);
+  const [showRecommendations, setShowRecommendations] = useState(false);
   
   const [editingItem, setEditingItem] = useState(null);
   const [editingBook, setEditingBook] = useState(null);
@@ -107,6 +108,17 @@ function App() {
       return () => { unsubCats(); unsubItems(); };
     }
   }, [user]);
+
+  // Tancar recomanacions en clicar fora
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest('.search-container')) {
+        setShowRecommendations(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleLogin = () => signInWithPopup(auth, googleProvider);
   const handleLogout = () => signOut(auth);
@@ -385,9 +397,13 @@ function App() {
               className="search-input" 
               placeholder="Cerca un llibre o contingut..." 
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onFocus={() => setShowRecommendations(true)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setShowRecommendations(true);
+              }}
             />
-            {searchTerm && (
+            {searchTerm && showRecommendations && (
               <div className="search-recommendations">
                 {items.filter(item => {
                   if (!item) return false;
