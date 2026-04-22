@@ -100,8 +100,8 @@ function App() {
 
   useEffect(() => {
     if (user) {
-      // Listener per a categories (llibres)
-      const qCats = query(collection(db, 'categories'), orderBy('creatEn', 'asc'));
+      // Listener per a categories (llibres) ordenats alfabèticament
+      const qCats = query(collection(db, 'categories'), orderBy('nom', 'asc'));
       const unsubCats = onSnapshot(qCats, (snapshot) => {
         setCategories(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
       });
