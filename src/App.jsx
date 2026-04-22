@@ -68,6 +68,13 @@ function App() {
   const [editingItem, setEditingItem] = useState(null);
   const [editingBook, setEditingBook] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   
   const [formData, setFormData] = useState({
     titol: '',
@@ -271,20 +278,22 @@ function App() {
   };
 
   const nextPage = () => {
-    if (currentPage + 2 < bookItems.length) {
+    const step = isMobile ? 1 : 2;
+    if (currentPage + step < bookItems.length) {
       setIsTurningPage(true);
       setTimeout(() => {
-        setCurrentPage(prev => prev + 2);
+        setCurrentPage(prev => prev + step);
         setIsTurningPage(false);
       }, 400);
     }
   };
 
   const prevPage = () => {
+    const step = isMobile ? 1 : 2;
     if (currentPage > 0) {
       setIsTurningPage(true);
       setTimeout(() => {
-        setCurrentPage(prev => Math.max(0, prev - 2));
+        setCurrentPage(prev => Math.max(0, prev - step));
         setIsTurningPage(false);
       }, 400);
     }
@@ -697,17 +706,17 @@ function App() {
 
                 <button 
                   className="btn-nav-side btn-nav-right"
-                  disabled={currentPage + 2 >= bookItems.length && (bookItems.length % 2 === 0 || currentPage + 1 >= bookItems.length)}
+                  disabled={isMobile ? currentPage + 1 >= bookItems.length : (currentPage + 2 >= bookItems.length && (bookItems.length % 2 === 0 || currentPage + 1 >= bookItems.length))}
                   onClick={nextPage}
                 >
                   <ChevronRight size={40} />
                 </button>
 
-                <div className="book-opened">
+                <div className={`book-opened ${isTurningPage ? 'page-turning' : ''}`}>
                   <div className="book-spine-center"></div>
                   
-                  {/* Pàgina Esquerra */}
-                  <div className={`book-page-half ${isTurningPage ? 'page-turning' : ''}`}>
+                  {/* Pàgina Esquerra (Visible sempre en mòbil, o única pàgina) */}
+                  <div className={`book-page-half ${isMobile ? 'mobile-visible' : ''}`}>
                     {/* Header persistent (Títol i Accions del Llibre) */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
                       <h1 className="book-viewer-title" style={{ fontSize: '1.8rem', flex: 1, border: 'none', margin: 0 }}>{selectedBook.nom}</h1>
@@ -761,43 +770,45 @@ function App() {
                     )}
                   </div>
 
-                  {/* Pàgina Dreta */}
-                  <div className={`book-page-half ${isTurningPage ? 'page-turning' : ''}`}>
-                    {bookItems[currentPage + 1] ? (
-                      <>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', opacity: 0.5, marginBottom: '1rem' }}>
-                          <span>Pàgina {currentPage + 2} de {bookItems.length}</span>
-                          <span>{bookItems[currentPage + 1].creatEn?.toDate().toLocaleString('ca-ES')}</span>
-                        </div>
-                        <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '2.2rem', lineHeight: '1', marginBottom: '1rem' }}>{bookItems[currentPage + 1].titol}</h2>
-                        <div style={{ fontSize: '1rem', whiteSpace: 'pre-wrap', lineHeight: '1.6', marginBottom: '1.5rem' }}>
-                          {String(bookItems[currentPage + 1].comentari || '').length > 400 ? (
-                            <>
-                              {String(bookItems[currentPage + 1].comentari || '').substring(0, 400)}
-                              <span className="read-more-dots" onClick={() => { setSelectedItem(bookItems[currentPage + 1]); setActiveModal('viewFull'); }}>...</span>
-                            </>
-                          ) : bookItems[currentPage + 1].comentari}
-                        </div>
-                        {bookItems[currentPage + 1].enllac && (
-                          <div style={{ marginBottom: '1.5rem' }}>
-                            <div className="form-label-book">Referència</div>
-                            <LinkPreview url={bookItems[currentPage + 1].enllac} />
+                  {/* Pàgina Dreta (Només Desktop) */}
+                  {!isMobile && (
+                    <div className="book-page-half">
+                      {bookItems[currentPage + 1] ? (
+                        <>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', opacity: 0.5, marginBottom: '1rem' }}>
+                            <span>Pàgina {currentPage + 2} de {bookItems.length}</span>
+                            <span>{bookItems[currentPage + 1].creatEn?.toDate().toLocaleString('ca-ES')}</span>
                           </div>
-                        )}
-                        <div style={{ marginTop: '1.5rem' }}>
-                          {bookItems[currentPage + 1].etiquetes?.map((tag, i) => <span key={i} className="tag-badge">#{tag}</span>)}
+                          <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '2.2rem', lineHeight: '1', marginBottom: '1rem' }}>{bookItems[currentPage + 1].titol}</h2>
+                          <div style={{ fontSize: '1rem', whiteSpace: 'pre-wrap', lineHeight: '1.6', marginBottom: '1.5rem' }}>
+                            {String(bookItems[currentPage + 1].comentari || '').length > 400 ? (
+                              <>
+                                {String(bookItems[currentPage + 1].comentari || '').substring(0, 400)}
+                                <span className="read-more-dots" onClick={() => { setSelectedItem(bookItems[currentPage + 1]); setActiveModal('viewFull'); }}>...</span>
+                              </>
+                            ) : bookItems[currentPage + 1].comentari}
+                          </div>
+                          {bookItems[currentPage + 1].enllac && (
+                            <div style={{ marginBottom: '1.5rem' }}>
+                              <div className="form-label-book">Referència</div>
+                              <LinkPreview url={bookItems[currentPage + 1].enllac} />
+                            </div>
+                          )}
+                          <div style={{ marginTop: '1.5rem' }}>
+                            {bookItems[currentPage + 1].etiquetes?.map((tag, i) => <span key={i} className="tag-badge">#{tag}</span>)}
+                          </div>
+                          <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem' }}>
+                            <button className="btn-icon-tiny" onClick={() => startEditPage(bookItems[currentPage + 1])}><Edit2 size={12} /> Editar</button>
+                            <button className="btn-icon-tiny" onClick={() => deletePage(bookItems[currentPage + 1].id)}><Trash2 size={12} /> Eliminar</button>
+                          </div>
+                        </>
+                      ) : (
+                        <div style={{ opacity: 0.1, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                          {currentPage + 1 >= bookItems.length ? "Fi del llibre" : <Book size={100} />}
                         </div>
-                        <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem' }}>
-                          <button className="btn-icon-tiny" onClick={() => startEditPage(bookItems[currentPage + 1])}><Edit2 size={12} /> Editar</button>
-                          <button className="btn-icon-tiny" onClick={() => deletePage(bookItems[currentPage + 1].id)}><Trash2 size={12} /> Eliminar</button>
-                        </div>
-                      </>
-                    ) : (
-                      <div style={{ opacity: 0.1, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-                        {currentPage + 1 >= bookItems.length ? "Fi del llibre" : <Book size={100} />}
-                      </div>
-                    )}
-                  </div>
+                      )}
+                    </div>
+                  )}
                 </div>
           </div>
         </div>
