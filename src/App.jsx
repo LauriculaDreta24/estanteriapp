@@ -279,25 +279,28 @@ function App() {
   };
 
   const filteredCategories = categories.filter(cat => {
-    if (!cat) return false;
+    if (!cat || !cat.id) return false;
     const term = (searchTerm || '').toLowerCase().trim();
     const termNoHash = term.startsWith('#') ? term.substring(1) : term;
     
     const matches = (val) => {
-      if (!val) return false;
+      if (val === undefined || val === null) return false;
       const str = String(val).toLowerCase();
-      return str.includes(term) || (termNoHash && str.includes(termNoHash));
+      return (term && str.includes(term)) || (termNoHash && str.includes(termNoHash));
     };
 
     const matchesName = matches(cat.nom);
-    const hasMatchingPages = items.some(item => {
+    const hasMatchingPages = Array.isArray(items) && items.some(item => {
       if (!item) return false;
-      return (item.categoryId === cat.id || item.categoriaId === cat.id) && 
-      (
-        matches(item.titol) || 
-        matches(item.comentari) ||
-        (Array.isArray(item.etiquetes) && item.etiquetes.some(t => matches(t)))
-      );
+      const isBookPage = (item.categoryId === cat.id || item.categoriaId === cat.id);
+      if (!isBookPage) return false;
+
+      const matchesTitle = matches(item.titol);
+      const matchesComment = matches(item.comentari);
+      const matchesTags = matches(item.etiquetesRaw) || 
+                         (Array.isArray(item.etiquetes) && item.etiquetes.some(t => matches(t)));
+      
+      return matchesTitle || matchesComment || matchesTags;
     });
     return matchesName || hasMatchingPages;
   });
@@ -391,9 +394,9 @@ function App() {
                   const term = searchTerm.toLowerCase().trim();
                   const termNoHash = term.startsWith('#') ? term.substring(1) : term;
                   const matches = (val) => {
-                    if (!val) return false;
+                    if (val === undefined || val === null) return false;
                     const str = String(val).toLowerCase();
-                    return str.includes(term) || (termNoHash && str.includes(termNoHash));
+                    return (term && str.includes(term)) || (termNoHash && str.includes(termNoHash));
                   };
 
                   return matches(item.titol) || 
@@ -412,8 +415,8 @@ function App() {
                         setSearchTerm('');
                       }
                     }}>
-                      <div className="form-label-book">{cat?.nom || 'Sense Llibre'}</div>
-                      <div style={{ fontWeight: 'bold' }}>{item.titol}</div>
+                      <div className="form-label-book">{String(cat?.nom || 'Sense Llibre')}</div>
+                      <div style={{ fontWeight: 'bold' }}>{String(item.titol || '')}</div>
                       <div style={{ fontSize: '0.8rem', opacity: 0.6, marginTop: '2px' }}>
                         {String(item.comentari || '').substring(0, 60)}...
                       </div>
@@ -432,53 +435,58 @@ function App() {
             </h3>
             <div style={{ display: 'grid', gap: '3rem' }}>
               {(() => {
-                const results = items.filter(item => {
-                  if (!item) return false;
+                try {
                   const term = searchTerm.toLowerCase().trim();
                   const termNoHash = term.startsWith('#') ? term.substring(1) : term;
                   const matches = (val) => {
-                    if (!val) return false;
+                    if (val === undefined || val === null) return false;
                     const str = String(val).toLowerCase();
-                    return str.includes(term) || (termNoHash && str.includes(termNoHash));
+                    return (term && str.includes(term)) || (termNoHash && str.includes(termNoHash));
                   };
 
-                  const matchesTitle = matches(item.titol);
-                  const matchesTags = matches(item.etiquetesRaw) || 
-                                     (Array.isArray(item.etiquetes) && item.etiquetes.some(t => matches(t)));
-                  const matchesComment = matches(item.comentari);
-                  return matchesTitle || matchesTags || matchesComment;
-                });
+                  const results = items.filter(item => {
+                    if (!item) return false;
+                    const matchesTitle = matches(item.titol);
+                    const matchesTags = matches(item.etiquetesRaw) || 
+                                       (Array.isArray(item.etiquetes) && item.etiquetes.some(t => matches(t)));
+                    const matchesComment = matches(item.comentari);
+                    return matchesTitle || matchesTags || matchesComment;
+                  });
 
-                if (results.length === 0) {
-                  return <div style={{ textAlign: 'center', padding: '3rem', opacity: 0.5 }}>No s'ha trobat cap pàgina amb aquest contingut.</div>;
-                }
-
-                return results.map(item => (
-                <div key={item.id} className="search-result-item" onClick={() => {
-                  const cat = categories.find(c => c.id === item.categoryId || c.id === item.categoriaId);
-                  if (cat) {
-                    const bookPages = items.filter(i => (i.categoryId || i.categoriaId) === cat.id);
-                    const pageIdx = bookPages.findIndex(i => i.id === item.id);
-                    openBook(cat);
-                    setCurrentPage(pageIdx >= 0 ? pageIdx : 0);
+                  if (results.length === 0) {
+                    return <div style={{ textAlign: 'center', padding: '3rem', opacity: 0.5 }}>No s'ha trobat cap pàgina amb aquest contingut.</div>;
                   }
-                }} style={{ cursor: 'pointer', padding: '1.5rem', border: '2px solid black', background: 'white', boxShadow: '6px 6px 0px black' }}>
-                  <div className="form-label-book" style={{ marginBottom: '0.5rem' }}>
-                    {categories.find(c => c.id === item.categoryId || c.id === item.categoriaId)?.nom || 'Sense Llibre'}
+
+                  return results.map(item => (
+                  <div key={item.id} className="search-result-item" onClick={() => {
+                    const cat = categories.find(c => c.id === item.categoryId || c.id === item.categoriaId);
+                    if (cat) {
+                      const bookPages = items.filter(i => (i.categoryId || i.categoriaId) === cat.id);
+                      const pageIdx = bookPages.findIndex(i => i.id === item.id);
+                      openBook(cat);
+                      setCurrentPage(pageIdx >= 0 ? pageIdx : 0);
+                    }
+                  }} style={{ cursor: 'pointer', padding: '1.5rem', border: '2px solid black', background: 'white', boxShadow: '6px 6px 0px black' }}>
+                    <div className="form-label-book" style={{ marginBottom: '0.5rem' }}>
+                      {String(categories.find(c => c.id === item.categoryId || c.id === item.categoriaId)?.nom || 'Sense Llibre')}
+                    </div>
+                    <h4 style={{ fontFamily: 'var(--font-serif)', fontSize: '2rem', lineHeight: '1', marginBottom: '1rem', color: 'var(--color-vermeil)' }}>
+                      {String(item.titol || '')}
+                    </h4>
+                    <p style={{ fontSize: '1rem', opacity: 0.8, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                      {String(item.comentari || '')}
+                    </p>
+                    <div style={{ marginTop: '1rem' }}>
+                      {Array.isArray(item.etiquetes) && item.etiquetes.map((tag, i) => (
+                        <span key={i} className="tag-badge">#{String(tag)}</span>
+                      ))}
+                    </div>
                   </div>
-                  <h4 style={{ fontFamily: 'var(--font-serif)', fontSize: '2rem', lineHeight: '1', marginBottom: '1rem', color: 'var(--color-vermeil)' }}>
-                    {item.titol}
-                  </h4>
-                  <p style={{ fontSize: '1rem', opacity: 0.8, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                    {item.comentari}
-                  </p>
-                  <div style={{ marginTop: '1rem' }}>
-                    {item.etiquetes?.map((tag, i) => (
-                      <span key={i} className="tag-badge">#{tag}</span>
-                    ))}
-                  </div>
-                </div>
-                ));
+                  ));
+                } catch (e) {
+                  console.error("Error en el filtratge: ", e);
+                  return <div style={{ color: 'red', padding: '2rem' }}>Error al processar la cerca.</div>;
+                }
               })()}
             </div>
           </section>
