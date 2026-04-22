@@ -383,6 +383,18 @@ function App() {
           <button className="btn-action" style={{ background: 'white', color: 'black' }} onClick={() => setActiveModal('addPage')}>
             <Plus size={16} style={{ marginRight: '5px' }} /> Pàgina
           </button>
+          <button 
+            onClick={() => {
+              setSearchTerm('');
+              setActiveModal(null);
+              setSelectedBook(null);
+            }} 
+            className="btn-action" 
+            style={{ background: 'transparent', color: 'white', border: '1px solid white', boxShadow: 'none', padding: '0.6rem' }}
+            title="Inici"
+          >
+            <Library size={16} />
+          </button>
           <button onClick={handleLogout} className="btn-action" style={{ background: 'transparent', color: 'white', border: '1px solid white', boxShadow: 'none', padding: '0.6rem' }}>
             <LogOut size={16} />
           </button>
