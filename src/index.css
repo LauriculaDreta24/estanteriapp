@@ -288,7 +288,7 @@ body {
 .shelf::after { right: 15%; }
 
 .book-spine {
-  width: 45px;
+  width: 65px;
   height: 180px;
   background-color: var(--color-vermeil);
   border-left: 2px solid rgba(0,0,0,0.1);
@@ -312,11 +312,13 @@ body {
 .book-title-spine {
   writing-mode: vertical-rl;
   text-transform: uppercase;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: white;
   font-weight: 500;
-  letter-spacing: 1.5px;
-  white-space: nowrap;
+  letter-spacing: 1px;
+  white-space: normal;
+  text-align: center;
+  padding: 0 5px;
   overflow: hidden;
   text-overflow: ellipsis;
   max-height: 120px;
