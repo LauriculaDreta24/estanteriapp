@@ -19,7 +19,7 @@ import {
 import { auth, googleProvider, db } from './firebase/config';
 import { LogOut, Plus, Link as LinkIcon, MessageSquare, Tag, Search, Book, X, ChevronLeft, ChevronRight, Edit2, Trash2, Settings, Library, Newspaper } from 'lucide-react';
 
-const ALLOWED_EMAILS = ['lauradb12@gmail.com', 'mrodzar@gmail.com'];
+const ALLOWED_EMAILS = ['lauradb12@gmail.com', 'marcrodzar@gmail.com', 'mrodzar@gmail.com'];
 
 // Component per a la previsualització d'enllaços fent servir Microlink
 const LinkPreview = ({ url }) => {
@@ -921,7 +921,9 @@ function App() {
                 const recentItems = items.filter(item => {
                   if (!item.creatEn) return false;
                   const date = item.creatEn.toDate();
-                  return date > weekAgo;
+                  const isRecent = date > weekAgo;
+                  const hasCategory = categories.some(c => c.id === item.categoriaId || c.id === item.categoryId);
+                  return isRecent && hasCategory;
                 });
 
                 if (recentItems.length === 0) {
@@ -943,8 +945,9 @@ function App() {
                         setCurrentPage(Math.floor(pageIdx / 2) * 2);
                       }
                     }}>
-                      <div className="form-label-book" style={{ color: cat?.color || 'var(--color-vermeil)' }}>
-                        {cat?.nom || 'Sense llibre'}
+                      <div className="form-label-book" style={{ color: cat?.color || 'var(--color-vermeil)', display: 'flex', justifyContent: 'space-between' }}>
+                        <span>{cat?.nom || 'Sense llibre'}</span>
+                        <span style={{ opacity: 0.8 }}>Per {item.autor}</span>
                       </div>
                       <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.8rem', margin: '0.5rem 0' }}>{item.titol}</h3>
                       <p style={{ fontSize: '0.9rem', opacity: 0.7, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
