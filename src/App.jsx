@@ -40,15 +40,33 @@ const LinkPreview = ({ url }) => {
       .catch(() => setLoading(false));
   }, [url]);
 
+  const getYoutubeId = (url) => {
+    try {
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+      const match = url.match(regExp);
+      return (match && match[2].length === 11) ? match[2] : null;
+    } catch (e) { return null; }
+  };
+
   if (loading) return <div className="link-preview-card" style={{ padding: '1rem', fontSize: '0.8rem' }}>Carregant vista prèvia...</div>;
-  if (!data) return null;
+  
+  const youtubeId = getYoutubeId(url);
+  const displayImage = data?.image?.url || (youtubeId ? `https://img.youtube.com/vi/${youtubeId}/mqdefault.jpg` : null);
+  const displayTitle = data?.title || (youtubeId ? "Vídeo de YouTube" : "Veure enllaç");
+  const displayDesc = data?.description || url;
 
   return (
     <a href={url} target="_blank" rel="noreferrer" className="link-preview-card">
-      {data.image && <img src={data.image.url} alt={data.title} className="link-preview-image" />}
+      {displayImage ? (
+        <img src={displayImage} alt={displayTitle} className="link-preview-image" />
+      ) : (
+        <div className="link-preview-image" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#eee' }}>
+          <LinkIcon size={24} opacity={0.2} />
+        </div>
+      )}
       <div className="link-preview-info">
-        <div className="link-preview-title">{data.title}</div>
-        {data.description && <div className="link-preview-desc">{data.description}</div>}
+        <div className="link-preview-title">{displayTitle}</div>
+        <div className="link-preview-desc" style={{ opacity: data?.description ? 0.7 : 0.4 }}>{displayDesc}</div>
       </div>
     </a>
   );
