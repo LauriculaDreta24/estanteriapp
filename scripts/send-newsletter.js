@@ -63,17 +63,17 @@ async function sendNewsletter() {
       const itemUrl = `https://estanteriappbiblioteca.web.app/?book=${item.categoriaId || item.categoryId}&page=${item.id}`;
       
       return `
-        <div style="border: 2px solid black; background: white; margin-bottom: 20px; padding: 20px; box-shadow: 6px 6px 0px black;">
-          <div style="text-transform: uppercase; font-size: 10px; letter-spacing: 2px; color: ${cat.color || '#E63946'}; font-weight: bold; margin-bottom: 5px; display: flex; justify-content: space-between;">
-            <span>${cat.nom}</span>
-            <span style="opacity: 0.6;">Per ${item.autor}</span>
+        <a href="${itemUrl}" target="_blank" style="text-decoration: none; color: inherit; display: block; margin-bottom: 20px;">
+          <div style="border: 2px solid black; background: white; padding: 20px; box-shadow: 6px 6px 0px black;">
+            <div style="text-transform: uppercase; font-size: 10px; letter-spacing: 2px; color: ${cat.color || '#E63946'}; font-weight: bold; margin-bottom: 5px; display: flex; justify-content: space-between;">
+              <span>${cat.nom}</span>
+              <span style="opacity: 0.6;">Per ${item.autor}</span>
+            </div>
+            <h2 style="font-family: 'Georgia', serif; font-size: 24px; margin: 10px 0; color: #E63946;">${item.titol}</h2>
+            <p style="font-size: 14px; line-height: 1.6; color: #333; margin-bottom: 15px;">${item.comentari}</p>
+            <div style="font-size: 11px; opacity: 0.5; color: #999;">${date}</div>
           </div>
-          <h2 style="font-family: 'Georgia', serif; font-size: 24px; margin: 10px 0; color: #E63946;">
-            <a href="${itemUrl}" target="_blank" style="color: #E63946; text-decoration: none;">${item.titol}</a>
-          </h2>
-          <p style="font-size: 14px; line-height: 1.6; color: #333; margin-bottom: 15px;">${item.comentari}</p>
-          <div style="font-size: 11px; opacity: 0.5;">${date}</div>
-        </div>
+        </a>
       `;
     }).join('');
 
