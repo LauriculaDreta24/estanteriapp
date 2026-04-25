@@ -902,6 +902,7 @@ function App() {
             )}
           </div>
         </div>
+      )}
       {/* Modal Newsletter */}
       {activeModal === 'newsletter' && (
         <div className="floating-form-overlay">
