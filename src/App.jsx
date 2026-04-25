@@ -277,9 +277,9 @@ function App() {
     }
   };
 
-  const openBook = (category) => {
+  const openBook = (category, startPage = 0) => {
     setSelectedBook(category);
-    setCurrentPage(0);
+    setCurrentPage(startPage);
     setActiveModal('viewBook');
   };
 
@@ -483,8 +483,8 @@ function App() {
                       if (cat) {
                         const bookPages = items.filter(i => (i.categoryId || i.categoriaId) === cat.id);
                         const pageIdx = bookPages.findIndex(i => i.id === item.id);
-                        openBook(cat);
-                        setCurrentPage(Math.floor(pageIdx / 2) * 2);
+                        const startPage = isMobile ? pageIdx : Math.floor(pageIdx / 2) * 2;
+                        openBook(cat, startPage);
                         setSearchTerm('');
                       }
                     }}>
@@ -539,8 +539,8 @@ function App() {
                     if (cat) {
                       const bookPages = items.filter(i => (i.categoryId || i.categoriaId) === cat.id);
                       const pageIdx = bookPages.findIndex(i => i.id === item.id);
-                      openBook(cat);
-                      setCurrentPage(pageIdx >= 0 ? pageIdx : 0);
+                      const startPage = isMobile ? pageIdx : Math.floor(pageIdx / 2) * 2;
+                      openBook(cat, startPage >= 0 ? startPage : 0);
                     }
                   }} style={{ cursor: 'pointer', padding: '1.5rem', border: '2px solid black', background: 'white', boxShadow: '6px 6px 0px black' }}>
                     <div className="form-label-book" style={{ marginBottom: '0.5rem' }}>
@@ -941,8 +941,8 @@ function App() {
                       if (cat) {
                         const bookPages = items.filter(i => (i.categoryId || i.categoriaId) === cat.id);
                         const pageIdx = bookPages.findIndex(i => i.id === item.id);
-                        openBook(cat);
-                        setCurrentPage(Math.floor(pageIdx / 2) * 2);
+                        const startPage = isMobile ? pageIdx : Math.floor(pageIdx / 2) * 2;
+                        openBook(cat, startPage);
                       }
                     }}>
                       <div className="form-label-book" style={{ color: cat?.color || 'var(--color-vermeil)', display: 'flex', justifyContent: 'space-between' }}>
