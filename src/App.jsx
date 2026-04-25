@@ -126,6 +126,32 @@ function App() {
     return unsubscribe;
   }, []);
 
+  // Deep linking: Obrir llibre/pàgina des de la URL
+  useEffect(() => {
+    if (user && categories.length > 0 && items.length > 0) {
+      const params = new URLSearchParams(window.location.search);
+      const bookId = params.get('book');
+      const pageId = params.get('page');
+
+      if (bookId) {
+        const cat = categories.find(c => c.id === bookId);
+        if (cat) {
+          const bookPages = items.filter(i => (i.categoryId || i.categoriaId) === cat.id);
+          let startPage = 0;
+          if (pageId) {
+            const pageIdx = bookPages.findIndex(i => i.id === pageId);
+            if (pageIdx >= 0) {
+              startPage = isMobile ? pageIdx : Math.floor(pageIdx / 2) * 2;
+            }
+          }
+          openBook(cat, startPage);
+          // Netegem la URL perquè no es torni a obrir en recarregar
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      }
+    }
+  }, [user, categories, items]);
+
   useEffect(() => {
     if (user) {
       // Listener per a categories (llibres) ordenats alfabèticament
