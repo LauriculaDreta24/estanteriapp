@@ -17,7 +17,7 @@ import {
   doc
 } from 'firebase/firestore';
 import { auth, googleProvider, db } from './firebase/config';
-import { LogOut, Plus, Link as LinkIcon, MessageSquare, Tag, Search, Book, X, ChevronLeft, ChevronRight, Edit2, Trash2, Settings, Library } from 'lucide-react';
+import { LogOut, Plus, Link as LinkIcon, MessageSquare, Tag, Search, Book, X, ChevronLeft, ChevronRight, Edit2, Trash2, Settings, Library, Newspaper } from 'lucide-react';
 
 const ALLOWED_EMAILS = ['lauradb12@gmail.com', 'mrodzar@gmail.com'];
 
@@ -374,7 +374,15 @@ function App() {
   return (
     <div className="blackie-container">
       <header className="header-red" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.5rem 5vw', position: 'relative' }}>
-        <div style={{ textAlign: 'left', flex: 1 }}>
+        <div 
+          onClick={() => {
+            setSearchTerm('');
+            setActiveModal(null);
+            setSelectedBook(null);
+          }}
+          style={{ textAlign: 'left', flex: 1, cursor: 'pointer' }}
+          title="Inici"
+        >
           <div className="label-thin" style={{ color: 'white', opacity: 0.8, letterSpacing: '4px', fontSize: '1.2rem', marginBottom: '0rem' }}>
             BIBLIOTECA
           </div>
@@ -422,16 +430,12 @@ function App() {
             <Plus size={16} style={{ marginRight: '5px' }} /> Pàgina
           </button>
           <button 
-            onClick={() => {
-              setSearchTerm('');
-              setActiveModal(null);
-              setSelectedBook(null);
-            }} 
             className="btn-action" 
             style={{ background: 'transparent', color: 'white', border: '1px solid white', boxShadow: 'none', padding: '0.6rem' }}
-            title="Inici"
+            title="Newsletter de la setmana"
+            onClick={() => setActiveModal('newsletter')}
           >
-            <Library size={16} />
+            <Newspaper size={16} />
           </button>
           <button onClick={handleLogout} className="btn-action" style={{ background: 'transparent', color: 'white', border: '1px solid white', boxShadow: 'none', padding: '0.6rem' }}>
             <LogOut size={16} />
@@ -858,8 +862,19 @@ function App() {
                           </div>
                         </>
                       ) : (
-                        <div style={{ opacity: 0.1, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-                          {currentPage + 1 >= bookItems.length ? "Fi del llibre" : <Book size={100} />}
+                        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: 'calc(100% - 60px)', gap: '2rem' }}>
+                          <div style={{ opacity: 0.1 }}>
+                            {currentPage + 1 >= bookItems.length ? "Fi del llibre" : <Book size={100} />}
+                          </div>
+                          {currentPage + 1 >= bookItems.length && (
+                            <button 
+                               className="btn-blackie" 
+                               style={{ fontSize: '0.8rem', padding: '0.8rem 1.5rem' }}
+                               onClick={() => openAddPageForBook(selectedBook.id)}
+                            >
+                               <Plus size={16} style={{ marginRight: '8px' }} /> Crear Pàgina
+                            </button>
+                          )}
                         </div>
                       )}
                     </div>
@@ -885,6 +900,63 @@ function App() {
                   <LinkPreview url={selectedItem.enllac} />
                </div>
             )}
+          </div>
+        </div>
+      {/* Modal Newsletter */}
+      {activeModal === 'newsletter' && (
+        <div className="floating-form-overlay">
+          <button className="btn-close" onClick={() => setActiveModal(null)}><X /></button>
+          <div className="main-content" style={{ maxWidth: '1000px' }}>
+            <div className="label-thin" style={{ color: 'var(--color-vermeil)', fontSize: '1.5rem', marginBottom: '0.5rem' }}>NEWSLETTER SETMANAL</div>
+            <h2 className="title-bold" style={{ fontSize: '4rem', marginBottom: '1rem', lineHeight: '0.9' }}>Novetats de la Setmana</h2>
+            <p style={{ fontSize: '1.1rem', opacity: 0.6, marginBottom: '3rem', fontFamily: 'var(--font-sans)' }}>
+              Aquestes són les pàgines que s'han afegit a la biblioteca en els darrers 7 dies.
+            </p>
+
+            <div className="newsletter-grid">
+              {(() => {
+                const weekAgo = new Date();
+                weekAgo.setDate(weekAgo.getDate() - 7);
+                const recentItems = items.filter(item => {
+                  if (!item.creatEn) return false;
+                  const date = item.creatEn.toDate();
+                  return date > weekAgo;
+                });
+
+                if (recentItems.length === 0) {
+                  return (
+                    <div style={{ textAlign: 'center', padding: '4rem', border: '2px dashed rgba(0,0,0,0.1)', width: '100%', gridColumn: '1 / -1' }}>
+                      <p style={{ opacity: 0.5 }}>No hi ha hagut novetats aquesta setmana.</p>
+                    </div>
+                  );
+                }
+
+                return recentItems.map(item => {
+                  const cat = categories.find(c => c.id === item.categoriaId || c.id === item.categoryId);
+                  return (
+                    <div key={item.id} className="newsletter-item" onClick={() => {
+                      if (cat) {
+                        const bookPages = items.filter(i => (i.categoryId || i.categoriaId) === cat.id);
+                        const pageIdx = bookPages.findIndex(i => i.id === item.id);
+                        openBook(cat);
+                        setCurrentPage(Math.floor(pageIdx / 2) * 2);
+                      }
+                    }}>
+                      <div className="form-label-book" style={{ color: cat?.color || 'var(--color-vermeil)' }}>
+                        {cat?.nom || 'Sense llibre'}
+                      </div>
+                      <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.8rem', margin: '0.5rem 0' }}>{item.titol}</h3>
+                      <p style={{ fontSize: '0.9rem', opacity: 0.7, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                        {item.comentari}
+                      </p>
+                      <div style={{ marginTop: 'auto', paddingTop: '1rem', fontSize: '0.75rem', opacity: 0.4 }}>
+                        {item.creatEn?.toDate().toLocaleDateString('ca-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
+                      </div>
+                    </div>
+                  );
+                });
+              })()}
+            </div>
           </div>
         </div>
       )}

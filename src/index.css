@@ -776,3 +776,33 @@ body {
     padding: 0.8rem;
   }
 }
+
+/* Newsletter Styles */
+.newsletter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.newsletter-item {
+  background: white;
+  border: 2px solid var(--color-negre);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 6px 6px 0px var(--color-negre);
+}
+
+.newsletter-item:hover {
+  transform: translate(-4px, -4px);
+  box-shadow: 10px 10px 0px var(--color-vermeil);
+}
+
+@media (max-width: 600px) {
+  .newsletter-grid {
+    grid-template-columns: 1fr;
+  }
+}
