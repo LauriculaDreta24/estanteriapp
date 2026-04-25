@@ -1,0 +1,31 @@
+name: Weekly Newsletter
+
+on:
+  schedule:
+    # Corre cada diumenge a les 08:00 UTC (10:00 AM a Espanya a l'estiu, 09:00 AM a l'hivern)
+    - cron: '0 8 * * 0'
+  workflow_dispatch: # Permet executar-ho manualment des de GitHub per provar
+
+jobs:
+  send-newsletter:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout codi
+        uses: actions/checkout@v3
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-size: '18'
+
+      - name: Instal·lar dependències
+        run: |
+          cd scripts
+          npm install
+
+      - name: Enviar Newsletter
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        run: |
+          node scripts/send-newsletter.js
