@@ -19,7 +19,7 @@ import {
 import { auth, googleProvider, db } from './firebase/config';
 import { LogOut, Plus, Link as LinkIcon, MessageSquare, Tag, Search, Book, X, ChevronLeft, ChevronRight, Edit2, Trash2, Settings, Library, Newspaper } from 'lucide-react';
 
-const ALLOWED_EMAILS = ['lauradb12@gmail.com', 'marcrodzar@gmail.com', 'mrodzar@gmail.com'];
+const ALLOWED_EMAILS = ['lauradb12@gmail.com', 'mrodzar@gmail.com'];
 
 // Component per a la previsualització d'enllaços fent servir Microlink
 const LinkPreview = ({ url }) => {
