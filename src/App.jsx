@@ -955,7 +955,13 @@ function App() {
             <div className="label-thin" style={{ color: 'var(--color-vermeil)', fontSize: '1.5rem', marginBottom: '0.5rem' }}>NEWSLETTER SETMANAL</div>
             <h2 className="title-bold" style={{ fontSize: '4rem', marginBottom: '1rem', lineHeight: '0.9' }}>Novetats de la Setmana</h2>
             <p style={{ fontSize: '1.1rem', opacity: 0.6, marginBottom: '3rem', fontFamily: 'var(--font-sans)' }}>
-              Aquestes són les pàgines que s'han afegit a la biblioteca en els darrers 7 dies.
+              {(() => {
+                const today = new Date();
+                const weekAgo = new Date();
+                weekAgo.setDate(today.getDate() - 6);
+                const options = { day: 'numeric', month: 'long' };
+                return `Setmana del ${weekAgo.toLocaleDateString('ca-ES', options)} al ${today.toLocaleDateString('ca-ES', options)}`;
+              })()}
             </p>
 
             <div className="newsletter-grid">

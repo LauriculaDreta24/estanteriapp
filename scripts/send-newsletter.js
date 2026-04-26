@@ -104,7 +104,15 @@ async function sendNewsletter() {
           
           <div style="margin-bottom: 30px;">
             <h3 style="font-size: 18px; border-bottom: 2px solid black; padding-bottom: 10px;">Novetats de la Setmana</h3>
-            <p style="font-size: 14px; opacity: 0.7;">Aquestes són les pàgines que s'han afegit a la biblioteca en els darrers 7 dies.</p>
+            <p style="font-size: 14px; opacity: 0.7;">
+              ${(() => {
+                const today = new Date();
+                const weekAgo = new Date();
+                weekAgo.setDate(today.getDate() - 6);
+                const options = { day: 'numeric', month: 'long' };
+                return `Setmana del ${weekAgo.toLocaleDateString('ca-ES', options)} al ${today.toLocaleDateString('ca-ES', options)}`;
+              })()}
+            </p>
           </div>
 
           ${itemsHtml}
