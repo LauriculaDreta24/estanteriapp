@@ -1,6 +1,6 @@
 name: Weekly Newsletter
 
-# on:
+on:
 #   schedule:
 #     # Corre cada diumenge a les 10:00 UTC (12:00 PM a Espanya a l'estiu)
 #     - cron: '0 10 * * 0'
