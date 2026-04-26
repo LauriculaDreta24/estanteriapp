@@ -118,8 +118,8 @@ async function sendNewsletter() {
       </html>
     `;
 
-    // 5. Enviar el correu només a la Laura per provar (Sorpresa!)
-    const recipients = ['lauradb12@gmail.com'];
+    // 5. Enviar el correu a tots dos
+    const recipients = ['lauradb12@gmail.com', 'mrodzar@gmail.com'];
     
     await transporter.sendMail({
       from: '"Estanteriapp" <lauradb12@gmail.com>',
