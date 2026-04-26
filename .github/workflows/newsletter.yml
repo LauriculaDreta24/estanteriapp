@@ -2,8 +2,8 @@ name: Weekly Newsletter
 
 on:
   schedule:
-    # Corre cada diumenge a les 08:00 UTC (10:00 AM a Espanya a l'estiu, 09:00 AM a l'hivern)
-    - cron: '0 8 * * 0'
+    # Corre cada diumenge a les 10:00 UTC (12:00 PM a Espanya a l'estiu)
+    - cron: '0 10 * * 0'
   workflow_dispatch: # Permet executar-ho manualment des de GitHub per provar
 
 jobs:
