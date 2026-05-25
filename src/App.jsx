@@ -879,7 +879,7 @@ function App() {
                       <>
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', opacity: 0.5, marginBottom: '1rem' }}>
                           <span>Pàgina {currentPage + 1} de {bookItems.length}</span>
-                          <span>{bookItems[currentPage].creatEn?.toDate().toLocaleString('ca-ES')}</span>
+                          <span>{bookItems[currentPage].autor ? `Per ${bookItems[currentPage].autor} - ` : ''}{bookItems[currentPage].creatEn?.toDate().toLocaleString('ca-ES')}</span>
                         </div>
 
                         <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '2.2rem', lineHeight: '1', marginBottom: '1rem' }}>{bookItems[currentPage].titol}</h2>
@@ -938,7 +938,9 @@ function App() {
                          </button>
                       </div>
                     )}
-                  </div>                   {!isMobile && (
+                  </div>
+
+                  {!isMobile && (
                     <div className="book-page-half" style={{ position: 'relative' }}>
                       {bookItems[currentPage + 1] && bookmarks[selectedBook.id]?.pageId === bookItems[currentPage + 1].id && (
                         <div className="bookmark-ribbon" title="Darrera pàgina llegida">
@@ -949,7 +951,7 @@ function App() {
                         <>
                           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', opacity: 0.5, marginBottom: '1rem' }}>
                             <span>Pàgina {currentPage + 2} de {bookItems.length}</span>
-                            <span>{bookItems[currentPage + 1].creatEn?.toDate().toLocaleString('ca-ES')}</span>
+                            <span>{bookItems[currentPage + 1].autor ? `Per ${bookItems[currentPage + 1].autor} - ` : ''}{bookItems[currentPage + 1].creatEn?.toDate().toLocaleString('ca-ES')}</span>
                           </div>
                           <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '2.2rem', lineHeight: '1', marginBottom: '1rem' }}>{bookItems[currentPage + 1].titol}</h2>
                           <div style={{ fontSize: '1rem', whiteSpace: 'pre-wrap', lineHeight: '1.6', marginBottom: '1.5rem' }}>
