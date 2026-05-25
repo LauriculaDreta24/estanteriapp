@@ -806,3 +806,56 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* Unread badge on book spines */
+.unread-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: var(--color-vermeil);
+  color: white;
+  border: 2px solid var(--color-negre);
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: bold;
+  box-shadow: 2px 2px 0px var(--color-negre);
+  z-index: 10;
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+  from { transform: scale(0); }
+  to { transform: scale(1); }
+}
+
+/* Bookmark ribbon inside book viewer */
+.bookmark-ribbon {
+  position: absolute;
+  top: 0;
+  right: 2rem;
+  z-index: 10;
+  color: var(--color-vermeil);
+  filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.15));
+  animation: slideDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.bookmark-btn {
+  transition: all 0.2s ease;
+}
+
+.bookmark-btn:hover {
+  opacity: 1 !important;
+  color: var(--color-vermeil) !important;
+  transform: translateY(-1px);
+}

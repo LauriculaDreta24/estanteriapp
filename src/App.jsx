@@ -14,10 +14,11 @@ import {
   where,
   updateDoc,
   deleteDoc,
-  doc
+  doc,
+  setDoc
 } from 'firebase/firestore';
 import { auth, googleProvider, db } from './firebase/config';
-import { LogOut, Plus, Link as LinkIcon, MessageSquare, Tag, Search, Book, X, ChevronLeft, ChevronRight, Edit2, Trash2, Settings, Library, Newspaper } from 'lucide-react';
+import { LogOut, Plus, Link as LinkIcon, MessageSquare, Tag, Search, Book, X, ChevronLeft, ChevronRight, Edit2, Trash2, Settings, Library, Newspaper, Bookmark } from 'lucide-react';
 
 const ALLOWED_EMAILS = ['lauradb12@gmail.com', 'mrodzar@gmail.com'];
 
@@ -77,6 +78,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [bookmarks, setBookmarks] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
   const [activeModal, setActiveModal] = useState(null); // 'addPage', 'addBook', 'viewBook', 'viewFull'
   const [selectedBook, setSelectedBook] = useState(null);
@@ -166,7 +168,18 @@ function App() {
         setItems(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
       });
 
-      return () => { unsubCats(); unsubItems(); };
+      // Listener per a bookmarks de l'usuari actiu
+      const qBookmarks = query(collection(db, 'bookmarks'), where('userEmail', '==', user.email.toLowerCase()));
+      const unsubBookmarks = onSnapshot(qBookmarks, (snapshot) => {
+        const bMap = {};
+        snapshot.docs.forEach(doc => {
+          const data = doc.data();
+          bMap[data.bookId] = { id: doc.id, ...data };
+        });
+        setBookmarks(bMap);
+      });
+
+      return () => { unsubCats(); unsubItems(); unsubBookmarks(); };
     }
   }, [user]);
 
@@ -180,6 +193,55 @@ function App() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Obtenir el timestamp de la pàgina més recent d'un llibre
+  const getMostRecentTime = (catId) => {
+    const catItems = items.filter(item => (item.categoriaId === catId || item.categoryId === catId));
+    if (catItems.length === 0) return 0;
+    return Math.max(...catItems.map(item => {
+      if (!item.creatEn) return Date.now(); // fallback per a actualitzacions optimistes
+      return item.creatEn.toDate ? item.creatEn.toDate().getTime() : new Date(item.creatEn).getTime();
+    }));
+  };
+
+  // Ordenar llibres dinàmicament per modificació recent, amb fallback alfabètic
+  const sortedCategories = [...categories].sort((a, b) => {
+    const aTime = getMostRecentTime(a.id);
+    const bTime = getMostRecentTime(b.id);
+    if (aTime !== bTime) return bTime - aTime;
+    return a.nom.localeCompare(b.nom);
+  });
+
+  // Obtenir el nombre de pàgines no llegides des de l'últim punt de llibre
+  const getUnreadCount = (bookId) => {
+    const bookmark = bookmarks[bookId];
+    if (!bookmark) return 0; // Si no hi ha punt de llibre, no mostra novetats per defecte
+    
+    const bookPages = items.filter(item => (item.categoriaId === bookId || item.categoryId === bookId));
+    const bookmarkTime = bookmark.pageCreatEn?.toDate ? bookmark.pageCreatEn.toDate().getTime() : new Date(bookmark.pageCreatEn).getTime();
+    
+    return bookPages.filter(item => {
+      if (!item.creatEn) return false;
+      const itemTime = item.creatEn.toDate ? item.creatEn.toDate().getTime() : new Date(item.creatEn).getTime();
+      return itemTime > bookmarkTime;
+    }).length;
+  };
+
+  // Guardar el punt de llibre per a un llibre concret
+  const handleSetBookmark = async (bookId, page) => {
+    if (!user || !page) return;
+    const bookmarkDocId = `${user.email.toLowerCase()}_${bookId}`;
+    try {
+      await setDoc(doc(db, 'bookmarks', bookmarkDocId), {
+        userEmail: user.email.toLowerCase(),
+        bookId: bookId,
+        pageId: page.id,
+        pageCreatEn: page.creatEn
+      });
+    } catch (error) {
+      console.error("Error desant el punt de llibre:", error);
+    }
+  };
 
   const handleLogin = () => signInWithPopup(auth, googleProvider);
   const handleLogout = () => {
@@ -360,7 +422,7 @@ function App() {
     }
   };
 
-  const filteredCategories = categories.filter(cat => {
+  const filteredCategories = sortedCategories.filter(cat => {
     if (!cat || !cat.id) return false;
     const term = (searchTerm || '').toLowerCase().trim();
     const termNoHash = term.startsWith('#') ? term.substring(1) : term;
@@ -612,19 +674,24 @@ function App() {
           </section>
         ) : (
           <>
-            {Array.from({ length: Math.ceil(categories.length / booksPerShelf) || 1 }).map((_, shelfIndex) => (
+            {Array.from({ length: Math.ceil(sortedCategories.length / booksPerShelf) || 1 }).map((_, shelfIndex) => (
               <div key={shelfIndex} className="shelf">
-                {categories.slice(shelfIndex * booksPerShelf, (shelfIndex + 1) * booksPerShelf).map(cat => (
+                {sortedCategories.slice(shelfIndex * booksPerShelf, (shelfIndex + 1) * booksPerShelf).map(cat => (
                   <div 
                     key={cat.id} 
                     className="book-spine" 
-                    style={{ backgroundColor: cat.color || '#E63946' }}
+                    style={{ backgroundColor: cat.color || '#E63946', position: 'relative' }}
                     onClick={() => openBook(cat)}
                   >
                     <span className="book-title-spine">{cat.nom}</span>
+                    {getUnreadCount(cat.id) > 0 && (
+                      <div className="unread-badge">
+                        +{getUnreadCount(cat.id)}
+                      </div>
+                    )}
                   </div>
                 ))}
-                {categories.length === 0 && shelfIndex === 0 && (
+                {sortedCategories.length === 0 && shelfIndex === 0 && (
                   <p style={{ position: 'absolute', width: '100%', textAlign: 'center', opacity: 0.3 }}>
                     L'estanteria està buida.
                   </p>
@@ -793,7 +860,12 @@ function App() {
                   <div className="book-spine-center"></div>
                   
                   {/* Pàgina Esquerra (Visible sempre en mòbil, o única pàgina) */}
-                  <div className={`book-page-half ${isMobile ? 'mobile-visible' : ''}`}>
+                  <div className={`book-page-half ${isMobile ? 'mobile-visible' : ''}`} style={{ position: 'relative' }}>
+                    {bookItems[currentPage] && bookmarks[selectedBook.id]?.pageId === bookItems[currentPage].id && (
+                      <div className="bookmark-ribbon" title="Darrera pàgina llegida">
+                        <Bookmark size={24} fill="var(--color-vermeil)" color="var(--color-vermeil)" />
+                      </div>
+                    )}
                     {/* Header persistent (Títol i Accions del Llibre) */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
                       <h1 className="book-viewer-title" style={{ fontSize: '1.8rem', flex: 1, border: 'none', margin: 0 }}>{selectedBook.nom}</h1>
@@ -841,9 +913,17 @@ function App() {
                               </span>
                             ))}
                           </div>
-                        <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem' }}>
+                        <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1.2rem', alignItems: 'center' }}>
                           <button className="btn-icon-tiny" onClick={() => startEditPage(bookItems[currentPage])}><Edit2 size={12} /> Editar</button>
                           <button className="btn-icon-tiny" onClick={() => deletePage(bookItems[currentPage].id)}><Trash2 size={12} /> Eliminar</button>
+                          <button 
+                            className="btn-icon-tiny bookmark-btn" 
+                            style={{ opacity: bookmarks[selectedBook.id]?.pageId === bookItems[currentPage].id ? 1 : 0.4 }}
+                            onClick={() => handleSetBookmark(selectedBook.id, bookItems[currentPage])}
+                          >
+                            <Bookmark size={12} fill={bookmarks[selectedBook.id]?.pageId === bookItems[currentPage].id ? "var(--color-vermeil)" : "none"} color={bookmarks[selectedBook.id]?.pageId === bookItems[currentPage].id ? "var(--color-vermeil)" : "currentColor"} /> 
+                            {bookmarks[selectedBook.id]?.pageId === bookItems[currentPage].id ? 'Punt de llibre desat' : 'Punt de llibre'}
+                          </button>
                         </div>
                       </>
                     ) : (
@@ -858,11 +938,13 @@ function App() {
                          </button>
                       </div>
                     )}
-                  </div>
-
-                  {/* Pàgina Dreta (Només Desktop) */}
-                  {!isMobile && (
-                    <div className="book-page-half">
+                  </div>                   {!isMobile && (
+                    <div className="book-page-half" style={{ position: 'relative' }}>
+                      {bookItems[currentPage + 1] && bookmarks[selectedBook.id]?.pageId === bookItems[currentPage + 1].id && (
+                        <div className="bookmark-ribbon" title="Darrera pàgina llegida">
+                          <Bookmark size={24} fill="var(--color-vermeil)" color="var(--color-vermeil)" />
+                        </div>
+                      )}
                       {bookItems[currentPage + 1] ? (
                         <>
                           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', opacity: 0.5, marginBottom: '1rem' }}>
@@ -900,9 +982,17 @@ function App() {
                               </span>
                             ))}
                           </div>
-                          <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem' }}>
+                          <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1.2rem', alignItems: 'center' }}>
                             <button className="btn-icon-tiny" onClick={() => startEditPage(bookItems[currentPage + 1])}><Edit2 size={12} /> Editar</button>
                             <button className="btn-icon-tiny" onClick={() => deletePage(bookItems[currentPage + 1].id)}><Trash2 size={12} /> Eliminar</button>
+                            <button 
+                              className="btn-icon-tiny bookmark-btn" 
+                              style={{ opacity: bookmarks[selectedBook.id]?.pageId === bookItems[currentPage + 1].id ? 1 : 0.4 }}
+                              onClick={() => handleSetBookmark(selectedBook.id, bookItems[currentPage + 1])}
+                            >
+                              <Bookmark size={12} fill={bookmarks[selectedBook.id]?.pageId === bookItems[currentPage + 1].id ? "var(--color-vermeil)" : "none"} color={bookmarks[selectedBook.id]?.pageId === bookItems[currentPage + 1].id ? "var(--color-vermeil)" : "currentColor"} /> 
+                              {bookmarks[selectedBook.id]?.pageId === bookItems[currentPage + 1].id ? 'Punt de llibre desat' : 'Punt de llibre'}
+                            </button>
                           </div>
                         </>
                       ) : (
